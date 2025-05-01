@@ -7,37 +7,28 @@
 #include <syslog.h>
 
 /*return a the log_level in string format */
-char *get_log_level(enum log_level level)
-{
-    switch (level)
-    {
-    case DEBUG:
-        return "DEBUG";
-        break;
-
-    case TRACE:
-        return "TRACE";
-        break;
-    case APPERRO:
-        return "APPERRO";
-        break;
-    case SYSERRO:
-        return "SYSERRO";
-        break;
-    default:
-        return "UNKWOWN";
-        break;
+char *get_log_level(enum log_level level) {
+    switch (level) {
+        case DEBUG:
+            return "DEBUG";
+        case TRACE:
+            return "TRACE";
+        case APPERRO:
+            return "APPERRO";
+        case SYSERRO:
+            return "SYSERRO";
+        default:
+            fprintf(stderr, "!!! Invalid log level !!!\n");
+            return NULL;
     }
 }
 
 /*write a buffer inside a specific file passed to this function*/
-int write_buffer(FILE *fp, char buffer[256], enum log_level level)
-{
+int write_buffer(FILE *fp, char buffer[256], enum log_level level) {
     char *funct_name = "write_buffer";
 
-    if (fp == NULL)
-    {
-        fprintf(stderr, "%s %d FUNCT:%s, Error: NULL File pointer with errno: %d..\n", __FILE__, __LINE__, funct_name, errno);
+    if (fp == NULL) {
+        fprintf(stderr, "%s %d - FUNCT: %s, Error: NULL File pointer with errno: %d\n", __FILE__, __LINE__, funct_name, errno);
         return errno;
     }
     int rc;
@@ -49,16 +40,16 @@ int write_buffer(FILE *fp, char buffer[256], enum log_level level)
     struct tm *tm_info = localtime(&time_now);
 
     char time_stamp[64];
-    strftime(time_stamp, sizeof(time_stamp), "%Y-%m-%d %H:%M:%S", tm_info); // Formatta il tempo
+    strftime(time_stamp, sizeof(time_stamp), "%d/%m/%Y - %H:%M.%S", tm_info); // Formatta il tempo
 
     //generate the string with the full current time 
     snprintf(time_stamp + strlen(time_stamp), sizeof(time_stamp) - strlen(time_stamp), ".%03ld", tv.tv_usec / 1000); // Aggiungi i millisecondi
 
-    rc = fprintf(fp, "[%s]-->[Pid:%d]-->[%s]-->[%s] \n", get_log_level(level), getpid(), time_stamp, buffer);
+    rc = fprintf(fp, "[%s]-->[PID: %d]-->[%s]-->[%s] \n", get_log_level(level), getpid(), time_stamp, buffer);
     rc = write_on_system_log(buffer, "logger");
     if (rc < 0)
     {
-        fprintf(stderr, "%s %d Error: NULL File pointer with errno: %d..\n", __FILE__, __LINE__, errno);
+        fprintf(stderr, "%s %d - FUNCT: %s, Error: NULL File pointer with errno: %d..\n", __FILE__, __LINE__, funct_name, errno);
         return errno;
     }
 
@@ -66,33 +57,30 @@ int write_buffer(FILE *fp, char buffer[256], enum log_level level)
     return rc;
 }
 
-int write_on_system_log(char buffer[256], char* program_name)
-{
+int write_on_system_log(char buffer[256], char* program_name) {
     int rc;
-    if(program_name == NULL)
-    {
+    if(program_name == NULL) {
         return EINVAL; 
     }
-    #ifdef  LINUX_ 
-    openlog (program_name, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 
-    syslog (LOG_MAKEPRI(LOG_LOCAL1, LOG_NOTICE), "Program started by User %d", getuid ());
-
-    syslog (LOG_INFO, buffer);
-
+#ifdef  LINUX_
+    openlog(program_name, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+    syslog(LOG_MAKEPRI(LOG_LOCAL1, LOG_NOTICE), "Program started by User %d", getuid ());
+    syslog(LOG_INFO, buffer);
     closelog();
 
     return 0;
-    #endif
+#endif
+
+    return 0;
 }
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
 
     /*Check the correct number of arguments passed */
     if (argc < 2)
     {
-        fprintf(stderr, "invalid argument num..\n");
+        fprintf(stderr, "Invalid arguments, missing <fp>\n");
         return -1;
     }
 
