@@ -6,24 +6,24 @@
 #include <stdbool.h>
 #include <errno.h>
 
-typedef enum
-{
+typedef enum {
     FILE_OPEN,
     FILE_CLOSE,
     FILE_READ,
     FILE_WRITE,
     FILE_CREATE,
     FILE_DELETE
+} file_operation;
 
-}FileOperation; 
 typedef struct{
     char buffer[256]; 
-    int isOnCache; 
-    int indexOfnearWord; //indice necessario per salvare i bytes che si trovano vicino alla parola richiesta una volta 
-}Cache; 
+    int is_on_cache;
+    int index_of_near_word; //indice necessario per salvare i bytes che si trovano vicino alla parola richiesta una volta
+} cache;
+
 bool is_in_cache(const char *s); 
-FILE* fileHandler(FILE *fp,const char* path, FileOperation fo);
+FILE* file_handler(FILE *fp,const char* path, file_operation fo);
 int read_from_file(FILE *fp, size_t num_of_bytes_to_read);
-char* read_something_from_file(const char* str, size_t num_of_bytes_to_read);  
-Cache initCache(); 
+char* read_something_from_file(const char* str, size_t num_of_bytes_to_read);
+cache init_cache();
 #endif
