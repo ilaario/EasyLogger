@@ -7,6 +7,12 @@
 #include <errno.h>
 #include <time.h> 
 #include <unistd.h>
+#include <stdarg.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/time.h>
+#include <syslog.h>
+
 
 typedef enum log_level{
     DEBUG,
@@ -38,35 +44,35 @@ int write_buffer(const char* buffer, log_level level);
  * @param buffer char[256]: Buffer
  * @return Return 0 if OK, else if error
  */
-int logx(log_level log, const char* buffer);
+int logx(log_level level, const char *buffer, ...);
 
 /***
  * Log in SYSERROR level
  * @param buffer char[256]: Buffer
  * @return Return 0 if OK, else if error
  */
-int syserr_log(const char* buffer);
+int syserr_log(const char* buffer, ...);
 
 /***
  * Log in SYSINFO level
  * @param buffer char[256]: Buffer
  * @return Return 0 if OK, else if error
  */
-int sysinfo_log(const char* buffer);
+int sysinfo_log(const char* buffer, ...);
 
 /***
  * Log in APPERROR level
  * @param buffer char[256]: Buffer
  * @return Return 0 if OK, else if error
  */
-int apperr_log(const char* buffer);
+int apperr_log(const char* buffer, ...);
 
 /***
  * Log in APPINFO level
  * @param buffer char[256]: Buffer
  * @return Return 0 if OK, else if error
  */
-int appinfo_log(const char* buffer);
+int appinfo_log(const char* buffer, ...);
 
 /***
  * Initialise the log, opening the file
